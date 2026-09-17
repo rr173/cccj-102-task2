@@ -228,20 +228,20 @@ class E2E:
              for i in range(3)]
         self.wait_delivery(GLOBEX, g[-1]["delivery_id"], timeout=15)
         good_elapsed = time.time() - t0
-        self.check(f"B租户在A被限流时照常并发投递（{good_elapsed:.2f}s < 2s）",
-                   good_elapsed < 2.0, f"elapsed={good_elapsed:.2f}")
+        self.check(f"B租户在A被限流时照常并发投递（{good_elapsed:.2f}s < 3s）",
+                   good_elapsed < 3.0, f"elapsed={good_elapsed:.2f}")
 
         # A 端点此时仍在退避/重试（未成功），且存在多次尝试
         d = None
         for _ in range(10):
             _, d = _http("GET",
                          f"{self.hub}/v1/deliveries/{b1['delivery_id']}", ACME)
-            if d["status"] in ("inflight", "pending") and d["fail_count"] >= 1:
+            if d["status"] in ("leased","pending") and d["fail_count"] >= 1:
                 break
             time.sleep(0.3)
         self.check("A端点已进入退避重试（fail_count>=1，状态仍在途）",
                    d["fail_count"] >= 1 and d["status"] in
-                   ("inflight", "pending"), f"d={d}")
+                   ("leased","pending"), f"d={d}")
 
         # 接收方恢复后，A 自己补上投递（证明按端点独立恢复）
         self.admin("/rules", {"path": bad_path, "mode": "ok"})

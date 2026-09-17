@@ -1,0 +1,1823 @@
+{
+  "generated_at": 1789624302.1426673,
+  "ttl_seconds": 3.0,
+  "store_clock_trusted": true,
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "scenarios": [
+    {
+      "id": 1,
+      "title": "并行上线单 owner / lane 分散 / 无二次 ack",
+      "passed": true,
+      "error": null,
+      "checks_passed": 6,
+      "checks_total": 6,
+      "stale_write_rejected": 2,
+      "receipts": 12,
+      "max_outage_seconds": 0.0,
+      "final_owners": {
+        "obj-0": "worker-a",
+        "obj-1": "worker-b",
+        "obj-10": "worker-a",
+        "obj-11": "worker-a",
+        "obj-2": "worker-b",
+        "obj-3": "worker-b",
+        "obj-4": "worker-a",
+        "obj-5": "worker-a",
+        "obj-6": "worker-b",
+        "obj-7": "worker-b",
+        "obj-8": "worker-b",
+        "obj-9": "worker-a"
+      },
+      "epoch_changes": [
+        {
+          "lane": "obj-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-1",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-2",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-3",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-4",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-5",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-6",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-7",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-8",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-0",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "obj-9",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-10",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-11",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "obj-3",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        }
+      ],
+      "detail": {
+        "elapsed": 0.78
+      },
+      "checks": [
+        {
+          "name": "12 条 lane 全部有 owner",
+          "ok": true,
+          "detail": "[('obj-0', 'worker-a'), ('obj-1', 'worker-b'), ('obj-10', 'worker-a'), ('obj-11', 'worker-a'), ('obj-2', 'worker-b'), ('obj-3', 'worker-b'), ('obj-4', 'worker-a'), ('obj-5', 'worker-a'), ('obj-6', 'worker-b'), ('obj-7', 'worker-b'), ('obj-8', 'worker-b'), ('obj-9', 'worker-a')]"
+        },
+        {
+          "name": "不同 lane 分散到 a/b 两个进程",
+          "ok": true,
+          "detail": "{'worker-a', 'worker-b'}"
+        },
+        {
+          "name": "receiver 收到 12 条 receipt",
+          "ok": true,
+          "detail": "n=12"
+        },
+        {
+          "name": "receipt 集合不存在二次 ack（event_id 唯一）",
+          "ok": true,
+          "detail": "dup=0"
+        },
+        {
+          "name": "12 个 job 全部 succeeded 且各只一次",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "seq 均为 1（每 lane 单 job），且无洞",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "kill -9 后 TTL 接手 / 序号单调 / 不重做 / 全收敛",
+      "passed": true,
+      "error": null,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "stale_write_rejected": 0,
+      "receipts": 9,
+      "max_outage_seconds": 6.29,
+      "final_owners": {
+        "stream": "worker-a"
+      },
+      "epoch_changes": [
+        {
+          "lane": "stream",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "stream",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        }
+      ],
+      "detail": {
+        "victim": "b",
+        "killed_at": 1789624247.839877,
+        "receiver_dedup_hits": 1,
+        "elapsed": 8.0
+      },
+      "checks": [
+        {
+          "name": "剩余 lane 由存活 worker 接手",
+          "ok": true,
+          "detail": "worker-a"
+        },
+        {
+          "name": "failover 后 epoch 递增",
+          "ok": true,
+          "detail": "1->2"
+        },
+        {
+          "name": "object_key 序号严格单调 1..9",
+          "ok": true,
+          "detail": "[1, 2, 3, 4, 5, 6, 7, 8, 9]"
+        },
+        {
+          "name": "9 个事件全部成功且每事件仅一次有效 ack（9 个不同 event_id）",
+          "ok": true,
+          "detail": "receipts=9 unique=9 dup=1"
+        },
+        {
+          "name": "所有 job 终态唯一为 succeeded（无 succeeded 被回退重做）",
+          "ok": true,
+          "detail": "{'succeeded'}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "超 TTL STW 恢复 / renew+claim+complete 陈旧写全拒",
+      "passed": true,
+      "error": null,
+      "checks_passed": 8,
+      "checks_total": 8,
+      "stale_write_rejected": 8,
+      "receipts": 2,
+      "max_outage_seconds": 2.81,
+      "final_owners": {
+        "freeze-job": "worker-b",
+        "freeze-lane": "worker-b"
+      },
+      "epoch_changes": [
+        {
+          "lane": "freeze-lane",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "freeze-job",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "freeze-job",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "freeze-job",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "freeze-lane",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "freeze-lane",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "freeze-job",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "freeze-lane",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        }
+      ],
+      "detail": {
+        "elapsed": 11.42
+      },
+      "checks": [
+        {
+          "name": "TTL 过期后 lane 被对端 steal，epoch+1",
+          "ok": true,
+          "detail": "3->4"
+        },
+        {
+          "name": "stale-attempts 接口可执行",
+          "ok": true,
+          "detail": "{'renew': 'stale_epoch', 'claim': 'stale_epoch', 'complete': 'stale_epoch'}"
+        },
+        {
+          "name": "陈旧 renew 被数据库拒绝(stale_epoch)",
+          "ok": true,
+          "detail": "{'renew': 'stale_epoch', 'claim': 'stale_epoch', 'complete': 'stale_epoch'}"
+        },
+        {
+          "name": "陈旧 claim 被数据库拒绝(stale_epoch)",
+          "ok": true,
+          "detail": "{'renew': 'stale_epoch', 'claim': 'stale_epoch', 'complete': 'stale_epoch'}"
+        },
+        {
+          "name": "陈旧 complete 被数据库拒绝(stale_epoch)",
+          "ok": true,
+          "detail": "{'renew': 'stale_epoch', 'claim': 'stale_epoch', 'complete': 'stale_epoch'}"
+        },
+        {
+          "name": "新 owner 的 epoch 保持不变（旧回写未覆盖所有权）",
+          "ok": true,
+          "detail": "epoch 4 owner worker-b"
+        },
+        {
+          "name": "旧回写未覆盖已 succeeded 的 job",
+          "ok": true,
+          "detail": "succeeded"
+        },
+        {
+          "name": "stale_write_rejected 至少 3 次",
+          "ok": true,
+          "detail": "[{'worker_id': 'worker-a', 'name': 'acquire', 'value': 2}, {'worker_id': 'worker-a', 'name': 'renew', 'value': 9}, {'worker_id': 'worker-a', 'name': 'stale_write_rejected', 'value': 8}, {'worker_id': 'worker-a', 'name': 'steal', 'value': 2}, {'worker_id': 'worker-b', 'name': 'steal', 'value': 2}]"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "429 future not_before 不提前 / 其余 lane 吞吐继续",
+      "passed": true,
+      "error": null,
+      "checks_passed": 5,
+      "checks_total": 5,
+      "stale_write_rejected": 0,
+      "receipts": 10,
+      "max_outage_seconds": 0.0,
+      "final_owners": {
+        "rate-limited": "worker-a",
+        "flow-0": "worker-a",
+        "flow-1": "worker-a",
+        "flow-2": "worker-a",
+        "flow-3": "worker-a",
+        "flow-4": "worker-a",
+        "flow-5": "worker-a",
+        "flow-6": "worker-a",
+        "flow-7": "worker-a",
+        "flow-8": "worker-a",
+        "flow-9": "worker-a"
+      },
+      "epoch_changes": [
+        {
+          "lane": "rate-limited",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "rate-limited",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "flow-0",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-1",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-2",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-3",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-4",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-5",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-6",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-7",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-8",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "flow-9",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        }
+      ],
+      "detail": {
+        "elapsed": 7.9
+      },
+      "checks": [
+        {
+          "name": "已记录 429 对应的 future not_before",
+          "ok": true,
+          "detail": "nb=1789624281.1136897 now=1789624266.250295"
+        },
+        {
+          "name": "继任者拿到更高 epoch 且保留 not_before 水位",
+          "ok": true,
+          "detail": "nb=1789624281.1136897"
+        },
+        {
+          "name": "未到 not_before，继任者禁止提前发出（0 成功 receipt）",
+          "ok": true,
+          "detail": "receipts=0"
+        },
+        {
+          "name": "其余 lane 吞吐继续增长（10/10 成功）",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "receiver 记录到 ratelimited",
+          "ok": true,
+          "detail": "{'/s4-throttle': {'received': 1, 'accepted': 0, 'duplicates': 0, 'ratelimited': 1, 'unavailable': 0, 'permanent': 0, 'bad_signature': 0}, '/s4-fast': {'received': 10, 'accepted': 10, 'duplicates': 0, 'ratelimited': 0, 'unavailable': 0, 'permanent': 0, 'bad_signature': 0}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "v1 积压与 v2 新批次按快照路径与签名代次投递",
+      "passed": true,
+      "error": null,
+      "checks_passed": 6,
+      "checks_total": 6,
+      "stale_write_rejected": 1,
+      "receipts": 7,
+      "max_outage_seconds": 0.0,
+      "final_owners": {
+        "batch-new": "worker-a",
+        "batch-old": "worker-b"
+      },
+      "epoch_changes": [
+        {
+          "lane": "batch-old",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "batch-new",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "batch-old",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "batch-new",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        }
+      ],
+      "detail": {
+        "elapsed": 6.08
+      },
+      "checks": [
+        {
+          "name": "v1 积压批次全部到达旧 path /s5-v1",
+          "ok": true,
+          "detail": "4/4"
+        },
+        {
+          "name": "v2 新增批次全部到达新 path /s5-v2",
+          "ok": true,
+          "detail": "3/3"
+        },
+        {
+          "name": "v1 receipt 验签代次=1（kid key-1）",
+          "ok": true,
+          "detail": "[('key-1', 1), ('key-1', 1), ('key-1', 1), ('key-1', 1)]"
+        },
+        {
+          "name": "v2 receipt 验签代次=2（kid key-2）",
+          "ok": true,
+          "detail": "[('key-2', 2), ('key-2', 2), ('key-2', 2)]"
+        },
+        {
+          "name": "无坏签名（快照密钥全部验过）",
+          "ok": true,
+          "detail": "bad=0"
+        },
+        {
+          "name": "failover 后由存活 worker 负责",
+          "ok": true,
+          "detail": "worker-b"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "drain 只减不增 / deadline handoff / 服务不断",
+      "passed": true,
+      "error": null,
+      "checks_passed": 7,
+      "checks_total": 7,
+      "stale_write_rejected": 7,
+      "receipts": 18,
+      "max_outage_seconds": 0.0,
+      "final_owners": {
+        "bg-0": "worker-b",
+        "bg-1": "worker-b",
+        "bg-2": "worker-b",
+        "bg-3": "worker-b",
+        "bg-4": "worker-b",
+        "bg-5": "worker-b",
+        "lane-0": "worker-b",
+        "lane-1": "worker-b",
+        "lane-10": "worker-b",
+        "lane-11": "worker-b",
+        "lane-2": "worker-b",
+        "lane-3": "worker-b",
+        "lane-4": "worker-b",
+        "lane-5": "worker-b",
+        "lane-6": "worker-b",
+        "lane-7": "worker-b",
+        "lane-8": "worker-b",
+        "lane-9": "worker-b"
+      },
+      "epoch_changes": [
+        {
+          "lane": "lane-0",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-1",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-2",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-1",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "lane-3",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-4",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-5",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "lane-6",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-7",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-8",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-9",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-10",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-11",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "lane-1",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "lane-3",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "lane-0",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "lane-2",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "lane-6",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "lane-7",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "lane-8",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "lane-3",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "drain_handoff"
+        },
+        {
+          "lane": "bg-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "bg-1",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "bg-2",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "bg-3",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "bg-4",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "bg-5",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        }
+      ],
+      "detail": {
+        "elapsed": 4.04
+      },
+      "checks": [
+        {
+          "name": "drain 前 worker-a 持有部分 lane",
+          "ok": true,
+          "detail": "6"
+        },
+        {
+          "name": "drain 期间 owned 数量只减不增",
+          "ok": true,
+          "detail": "[6, 6, 0]"
+        },
+        {
+          "name": "deadline 后 worker-a 不再持有任何 lane",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "worker-a 保持 draining 状态",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "API/日志留下 handoff reason（drain_handoff/expiry_steal）",
+          "ok": true,
+          "detail": "{'expiry_steal', 'rebalance', 'drain_handoff', 'acquire'}"
+        },
+        {
+          "name": "drain 全程成功 receipt 不断（18 个事件全成功）",
+          "ok": true,
+          "detail": "receipts=18"
+        },
+        {
+          "name": "无 orphan lane",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "加入移除重启+多次 rebalance / cap 约束 / 无 orphan",
+      "passed": true,
+      "error": null,
+      "checks_passed": 9,
+      "checks_total": 9,
+      "stale_write_rejected": 19,
+      "receipts": 20,
+      "max_outage_seconds": 0.0,
+      "final_owners": {
+        "k-0": "worker-b",
+        "k-1": "worker-a",
+        "k-10": "worker-b",
+        "k-11": "worker-a",
+        "k-12": "worker-b",
+        "k-13": "worker-a",
+        "k-14": "worker-a",
+        "k-15": "worker-a",
+        "k-2": "worker-b",
+        "k-3": "worker-b",
+        "k-4": "worker-b",
+        "k-5": "worker-b",
+        "k-6": "worker-b",
+        "k-7": "worker-a",
+        "k-8": "worker-a",
+        "k-9": "worker-b",
+        "post-0": "worker-a",
+        "post-1": "worker-a",
+        "post-2": "worker-a",
+        "post-3": "worker-b"
+      },
+      "epoch_changes": [
+        {
+          "lane": "k-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-1",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-2",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-3",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-4",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-5",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-1",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-6",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-7",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-8",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-0",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-9",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-10",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-11",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-3",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-12",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-13",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-14",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-2",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-15",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-0",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-3",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 2,
+          "new_epoch": 2,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-6",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-7",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-8",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-12",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-13",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-14",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 1,
+          "new_epoch": 1,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-0",
+          "old": "worker-b",
+          "new": null,
+          "old_epoch": 3,
+          "new_epoch": 3,
+          "reason": "worker_restart"
+        },
+        {
+          "lane": "k-8",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-14",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-13",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-2",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-4",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-3",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-6",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-5",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-9",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-12",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-7",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-10",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-11",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-15",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-2",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-4",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-1",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 4,
+          "new_epoch": 5,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-10",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-8",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-13",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-14",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-0",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 4,
+          "new_epoch": 5,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-3",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-7",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-12",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-6",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-5",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-9",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-2",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 4,
+          "new_epoch": 5,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-4",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-10",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-0",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 5,
+          "new_epoch": 6,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-3",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 4,
+          "new_epoch": 5,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-5",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-6",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-9",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "k-11",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-15",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 5,
+          "new_epoch": 6,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-8",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "post-0",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "post-1",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "post-2",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "post-3",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "k-13",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-14",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "k-7",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "rebalance"
+        }
+      ],
+      "detail": {
+        "elapsed": 10.94
+      },
+      "checks": [
+        {
+          "name": "单轮 rebalance 搬动 <= budget",
+          "ok": true,
+          "detail": "moved=0"
+        },
+        {
+          "name": "单轮 rebalance 搬动 <= budget",
+          "ok": true,
+          "detail": "moved=0"
+        },
+        {
+          "name": "单轮 rebalance 搬动 <= budget",
+          "ok": true,
+          "detail": "moved=0"
+        },
+        {
+          "name": "恢复后单轮搬动仍 <= budget",
+          "ok": true,
+          "detail": "moved=2"
+        },
+        {
+          "name": "恢复后单轮搬动仍 <= budget",
+          "ok": true,
+          "detail": "moved=2"
+        },
+        {
+          "name": "最终不存在 orphan lane",
+          "ok": true,
+          "detail": "[]"
+        },
+        {
+          "name": "lane 由在线成员持有",
+          "ok": true,
+          "detail": "{'worker-a', 'worker-b'}"
+        },
+        {
+          "name": "16 个事件全部成功、无重复 ack",
+          "ok": true,
+          "detail": "16"
+        },
+        {
+          "name": "failover 期间新增工作持续收敛",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "store outage 停止出站 / 恢复后旧 epoch 不复活",
+      "passed": true,
+      "error": null,
+      "checks_passed": 6,
+      "checks_total": 6,
+      "stale_write_rejected": 7,
+      "receipts": 10,
+      "max_outage_seconds": 3.68,
+      "final_owners": {
+        "after-0": "worker-b",
+        "after-1": "worker-b",
+        "after-2": "worker-b",
+        "after-3": "worker-a",
+        "after-4": "worker-a",
+        "after-5": "worker-a",
+        "warm-0": "worker-b",
+        "warm-1": "worker-a",
+        "warm-2": "worker-a",
+        "warm-3": "worker-b"
+      },
+      "epoch_changes": [
+        {
+          "lane": "warm-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-1",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-2",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "warm-3",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-1",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "warm-0",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "rebalance"
+        },
+        {
+          "lane": "after-0",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "after-1",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "after-2",
+          "old": null,
+          "new": "worker-b",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-3",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "warm-0",
+          "old": "worker-a",
+          "new": "worker-b",
+          "old_epoch": 2,
+          "new_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "after-3",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "after-4",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "after-5",
+          "old": null,
+          "new": "worker-a",
+          "old_epoch": 0,
+          "new_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "lane": "warm-2",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 1,
+          "new_epoch": 2,
+          "reason": "expiry_steal"
+        },
+        {
+          "lane": "warm-1",
+          "old": "worker-b",
+          "new": "worker-a",
+          "old_epoch": 3,
+          "new_epoch": 4,
+          "reason": "expiry_steal"
+        }
+      ],
+      "detail": {
+        "elapsed": 7.48
+      },
+      "checks": [
+        {
+          "name": "store 拒绝写入期间 worker 不产生新的出站投递",
+          "ok": true,
+          "detail": "before=4 during=4"
+        },
+        {
+          "name": "worker 记录 touch/写被阻断（不靠内存 ownership 发送）",
+          "ok": true,
+          "detail": "112"
+        },
+        {
+          "name": "store 恢复后投递恢复，6 个新 job 成功",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "恢复后旧 epoch 仍不可复活（renew/claim 均拒）",
+          "ok": true,
+          "detail": "{'renew': 'stale_epoch', 'claim': 'stale_epoch', 'complete': 'skipped(no job_id)'}"
+        },
+        {
+          "name": "最终无 orphan lane",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "全程无重复 ack",
+          "ok": true,
+          "detail": "0"
+        }
+      ]
+    }
+  ]
+}

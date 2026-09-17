@@ -1,14 +1,40 @@
-# 一条命令启动完整运行环境（投递中枢 + 模拟接收方）：
-#   docker compose up --build
+# 两种形态任选其一：
+#
+# 1) 兼容单进程（默认入口，与旧版一致）：
+#      docker compose up hub sink
+#
+# 2) HA 双 worker（store + worker-a + worker-b + sink，各自独立 OS 进程，
+#    共用一个 durable store，lease/epoch/fence 全部在数据库事务中仲裁）：
+#      docker compose up store worker-a worker-b sink
+#
 services:
+  # ---- 兼容单进程形态 ----
   hub:
     build: .
     image: webhook-hub
+    command: ["hub"]
     ports:
       - "8080:8080"
     environment:
       WHUB_DB: /data/whub.db
       WHUB_HTTP_TIMEOUT: "5"
+    volumes:
+      - whub-data:/data
+
+  # ---- HA 形态：共享 durable store ----
+  store:
+    build: .
+    image: webhook-hub
+    command: ["store", "--host", "0.0.0.0", "--port", "8080"]
+    ports:
+      - "8080:8080"
+    environment:
+      WHUB_DB: /data/whub.db
+      WHUB_SEED: "1"
+      WHUB_LEASE_TTL: "30"
+      WHUB_RENEW_INTERVAL: "10"
+      WHUB_ACQUIRE_BUDGET: "4"
+      WHUB_REBALANCE_BUDGET: "2"
     volumes:
       - whub-data:/data
     healthcheck:
@@ -17,6 +43,36 @@ services:
       timeout: 3s
       retries: 10
 
+  worker-a:
+    build: .
+    image: webhook-hub
+    command: ["worker", "--worker-id", "worker-a", "--host", "0.0.0.0",
+              "--port", "8091"]
+    ports:
+      - "8091:8091"
+    environment:
+      WHUB_STORE_URL: http://store:8080
+      WHUB_LEASE_TTL: "30"
+      WHUB_RENEW_INTERVAL: "10"
+      WHUB_SWEEP_INTERVAL: "1"
+    depends_on:
+      - store
+
+  worker-b:
+    build: .
+    image: webhook-hub
+    command: ["worker", "--worker-id", "worker-b", "--host", "0.0.0.0",
+              "--port", "8092"]
+    ports:
+      - "8092:8092"
+    environment:
+      WHUB_STORE_URL: http://store:8080
+      WHUB_LEASE_TTL: "30"
+      WHUB_RENEW_INTERVAL: "10"
+      WHUB_SWEEP_INTERVAL: "1"
+    depends_on:
+      - store
+
   sink:
     build: .
     image: webhook-hub
@@ -24,11 +80,6 @@ services:
               "--register", "key-demo:whsec_demo_secret"]
     ports:
       - "9000:9000"
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/healthz')"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
 
 volumes:
   whub-data:

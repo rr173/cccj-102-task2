@@ -245,6 +245,8 @@ class SinkHandler(BaseHTTPRequestHandler):
                 "event_id": event_id,
                 "delivery_id": delivery_id,
                 "kid": kid,
+                "sig_version": env.get("sig_version", 1),
+                "path": path,
                 "seq": env.get("seq"),
                 "object_key": env.get("object_key"),
                 "ts": time.time(),
@@ -255,9 +257,10 @@ class SinkHandler(BaseHTTPRequestHandler):
         st = self.state
         auth = self.headers.get("X-Whub-Signature", "")
         ts_hdr = self.headers.get("X-Whub-Timestamp", "")
+        ver_hdr = self.headers.get("X-Whub-Signature-Version", "v1")
         try:
             parts = dict(p.split("=", 1) for p in auth.split(",") if "=" in p)
-            ts, sig = parts["t"], parts["v1"]
+            ts = parts["t"]
         except (KeyError, ValueError):
             return False, "malformed signature header"
         if ts != ts_hdr:
@@ -268,10 +271,27 @@ class SinkHandler(BaseHTTPRequestHandler):
             secret = st.keys.get(kid)
         if secret is None:
             return False, f"unknown kid {kid!r}"
-        signing_text = f"{ts}.{self.headers.get('X-Whub-Delivery-Id','')}."
-        mac = hmac.new(secret.encode(),
-                       signing_text.encode() + raw, hashlib.sha256)
-        expect = base64.b64encode(mac.digest()).decode()
+        delivery_id = self.headers.get("X-Whub-Delivery-Id", "")
+        event_id = self.headers.get("X-Whub-Event-Id", "")
+        if ver_hdr == "v2" or "v2" in parts:
+            # v2 签名文本：ts.event_id.delivery_id.body；十六进制摘要
+            try:
+                sig = parts["v2"]
+            except KeyError:
+                return False, "missing v2 tag"
+            signing_text = f"{ts}.{event_id}.{delivery_id}."
+            mac = hmac.new(secret.encode(),
+                           signing_text.encode() + raw, hashlib.sha256)
+            expect = mac.hexdigest()
+        else:
+            try:
+                sig = parts["v1"]
+            except KeyError:
+                return False, "missing v1 tag"
+            signing_text = f"{ts}.{delivery_id}."
+            mac = hmac.new(secret.encode(),
+                           signing_text.encode() + raw, hashlib.sha256)
+            expect = base64.b64encode(mac.digest()).decode()
         if not hmac.compare_digest(expect, sig):
-            return False, "signature mismatch"
-        return True, ""
+            return False, f"{ver_hdr} signature mismatch"
+        return True, ver_hdr

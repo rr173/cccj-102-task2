@@ -3,7 +3,10 @@
 
 真正的合作方系统应：
 1. 用 X-Whub-Key-Id 找到本地保存的对应版本密钥；
-2. 按 "{timestamp}.{delivery_id}.{raw_body}" 重算 HMAC-SHA256 并常量时间比较；
+2. 按签名代次重算 HMAC-SHA256 并常量时间比较：
+     v1: base64(HMAC("{ts}.{delivery_id}.{raw_body}"))
+     v2: hex(HMAC("{ts}.{event_id}.{delivery_id}.{raw_body}"))
+   代次由 X-Whub-Signature-Version 或签名头里的 v1=/v2= 标签决定；
 3. 校验时间戳新鲜度防重放；
 4. 以 X-Whub-Event-Id 作为幂等键，重复投递直接返回首次结果，绝不重复处理。
 
@@ -55,18 +58,26 @@ class Receiver(BaseHTTPRequestHandler):
         except ValueError:
             return self._reply(401, {"error": "bad timestamp"})
 
-        # 3) 重算签名并常量时间比较
+        # 3) 按签名代次重算并常量时间比较
         delivery_id = self.headers.get("X-Whub-Delivery-Id", "")
-        signing_text = f"{ts}.{delivery_id}.".encode() + raw
-        expect = base64.b64encode(
-            hmac.new(secret.encode(), signing_text, hashlib.sha256).digest()
-        ).decode()
-        got = ""
-        for part in self.headers.get("X-Whub-Signature", "").split(","):
-            if part.startswith("v1="):
-                got = part[3:]
+        event_id = self.headers.get("X-Whub-Event-Id", "")
+        ver = self.headers.get("X-Whub-Signature-Version", "v1")
+        tags = dict(p.split("=", 1) for p in
+                    self.headers.get("X-Whub-Signature", "").split(",")
+                    if "=" in p)
+        if "v2" in tags or ver == "v2":
+            signing_text = f"{ts}.{event_id}.{delivery_id}.".encode() + raw
+            expect = hmac.new(secret.encode(), signing_text,
+                              hashlib.sha256).hexdigest()
+            got = tags.get("v2", "")
+        else:
+            signing_text = f"{ts}.{delivery_id}.".encode() + raw
+            expect = base64.b64encode(
+                hmac.new(secret.encode(), signing_text,
+                         hashlib.sha256).digest()).decode()
+            got = tags.get("v1", "")
         if not hmac.compare_digest(expect, got):
-            return self._reply(401, {"error": "signature mismatch"})
+            return self._reply(401, {"error": f"{ver} signature mismatch"})
 
         env = json.loads(raw)
         event_id = env["event_id"]
