@@ -238,6 +238,20 @@ class SinkHandler(BaseHTTPRequestHandler):
         with st.lock:
             self._exit_parallel(path)
             counters = st._counters(path)
+            # delay 在锁外睡眠期间，failover 的继任者可能已用同一 event_id
+            # 完成确认：加锁后必须二次幂等复核，绝不追加第二条成功 receipt。
+            if event_id in st.seen.setdefault(path, {}):
+                st.duplicates += 1
+                counters["duplicates"] += 1
+                first = st.seen[path][event_id]
+                body = json.dumps({"deduped": True,
+                                   "first_code": first["code"]}).encode()
+                self.send_response(first["code"])
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             counters["accepted"] += 1
             st.seen.setdefault(path, {})[event_id] = {"code": 200}
             # kid 即签名版本标识（key-1/key-2…），用于断言“旧事件旧签名”

@@ -1,0 +1,461 @@
+{
+  "generated_at": "2026-09-17T09:31:39",
+  "ttl_s": 4.0,
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "duration_s": 97.81
+  },
+  "scenarios": [
+    {
+      "scenario": "1",
+      "title": "双 worker 并行上线：唯一 owner / lane 分散 / 无二次 ack",
+      "status": "pass",
+      "error": null,
+      "duration_s": 1.92,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 1.92,
+          "lane_id": "ep_db47ab047f0b20848254c854",
+          "owner_id": "worker-a",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "at": 1.92,
+          "lane_id": "ep_33e9b201e7a2fa848c2f0ced",
+          "owner_id": "worker-a",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "at": 1.92,
+          "lane_id": "ep_71308d5488015bd3caa103a4",
+          "owner_id": "worker-b",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "at": 1.92,
+          "lane_id": "ep_008b3e9b5400d623b93be8b2",
+          "owner_id": "worker-b",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        }
+      ],
+      "max_interruption_s": 0.0,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-a,worker-b",
+      "receipt_count": 12,
+      "metrics": {
+        "worker-a": {
+          "acquire": 2,
+          "renew": 8
+        },
+        "worker-b": {
+          "acquire": 2,
+          "renew": 8
+        }
+      },
+      "note": {
+        "initial_owners": {
+          "ep_db47ab047f0b20848254c854": "worker-a",
+          "ep_33e9b201e7a2fa848c2f0ced": "worker-a",
+          "ep_71308d5488015bd3caa103a4": "worker-b",
+          "ep_008b3e9b5400d623b93be8b2": "worker-b"
+        },
+        "total_receipts": 12,
+        "final_owner": "worker-a,worker-b",
+        "final_owners": {
+          "/s1/lane-a": "worker-a",
+          "/s1/lane-b": "worker-a",
+          "/s1/lane-c": "worker-b",
+          "/s1/lane-d": "worker-b"
+        }
+      }
+    },
+    {
+      "scenario": "2",
+      "title": "kill -9 failover：TTL 接手、序号单调、已 ack 不重做、全部收敛",
+      "status": "pass",
+      "error": null,
+      "duration_s": 11.46,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 11.46,
+          "lane_id": "ep_ac55770bed137605a7a24bbc",
+          "owner_id": "worker-b",
+          "lease_epoch": 2,
+          "reason": "expiry_steal"
+        }
+      ],
+      "max_interruption_s": 5.01,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-b",
+      "receipt_count": 10,
+      "metrics": {
+        "worker-a": {
+          "renew": 3
+        },
+        "worker-b": {
+          "orphan_recovered": 1,
+          "renew": 22,
+          "steal": 1
+        }
+      },
+      "note": {
+        "failover_after_s": 5.01,
+        "total_recovery_s": 10.18,
+        "final_owner": "worker-b",
+        "receipts": 10,
+        "stale_write_rejected": 0
+      }
+    },
+    {
+      "scenario": "3",
+      "title": "长暂停恢复：renew/claim/complete 三类陈旧 epoch 写全部被拒",
+      "status": "pass",
+      "error": null,
+      "duration_s": 19.39,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 19.39,
+          "lane_id": "ep_c142045e35de777053513587",
+          "owner_id": "worker-b",
+          "lease_epoch": 2,
+          "reason": "expiry_steal"
+        }
+      ],
+      "max_interruption_s": 9.84,
+      "stale_write_rejected_total": 4,
+      "final_owner": "worker-b",
+      "receipt_count": 13,
+      "metrics": {
+        "__debug__": {
+          "stale_write_rejected": 3
+        },
+        "worker-a": {
+          "renew": 3,
+          "stale_write_rejected": 1
+        },
+        "worker-b": {
+          "orphan_recovered": 0,
+          "rebalance_handoff": 1,
+          "renew": 34,
+          "steal": 1
+        }
+      },
+      "note": {
+        "pause_duration_s": 1.62,
+        "stale_renew": true,
+        "stale_claim": true,
+        "stale_complete": true,
+        "natural_renew_rejected_after_resume": true,
+        "stale_write_rejected_total": 4,
+        "total_receipts": 13,
+        "final_owner": "worker-b"
+      }
+    },
+    {
+      "scenario": "4",
+      "title": "429/timeout not_before 水位随 failover 保留，不提前发送",
+      "status": "pass",
+      "error": null,
+      "duration_s": 13.17,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 13.16,
+          "lane_id": "ep_fbeb380d53f2e5515eda7ba9",
+          "owner_id": "worker-b",
+          "lease_epoch": 3,
+          "reason": "expiry_steal"
+        },
+        {
+          "at": 13.17,
+          "lane_id": "ep_7c890e32fb18b5b48341e438",
+          "owner_id": "worker-b",
+          "lease_epoch": 1,
+          "reason": "acceptance_assign"
+        }
+      ],
+      "max_interruption_s": 0.0,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-b",
+      "receipt_count": 7,
+      "metrics": {
+        "worker-a": {
+          "renew": 1
+        },
+        "worker-b": {
+          "acquire": 1,
+          "orphan_recovered": 1,
+          "renew": 25,
+          "steal": 1
+        }
+      },
+      "note": {
+        "final_owner": "worker-b",
+        "total_receipts": 7,
+        "final_owner_slow": "worker-b",
+        "fast_lane_receipts": 6,
+        "not_before_preserved": true
+      }
+    },
+    {
+      "scenario": "5",
+      "title": "v1→v2 轮换即 failover：两批各到各 path，验签代次与快照一致",
+      "status": "pass",
+      "error": null,
+      "duration_s": 7.25,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 7.25,
+          "lane_id": "ep_bada16d2ec715ce13054dfa7",
+          "owner_id": "worker-b",
+          "lease_epoch": 2,
+          "reason": "expiry_steal"
+        }
+      ],
+      "max_interruption_s": 0.0,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-b",
+      "receipt_count": 6,
+      "metrics": {
+        "worker-a": {
+          "renew": 3
+        },
+        "worker-b": {
+          "orphan_recovered": 1,
+          "renew": 6,
+          "steal": 1
+        }
+      },
+      "note": {
+        "final_owner": "worker-b",
+        "total_receipts": 6,
+        "v1_receipts": 3,
+        "v2_receipts": 3
+      }
+    },
+    {
+      "scenario": "6",
+      "title": "drain：owned 只减不增、deadline 收尾、剩余高 epoch 接手",
+      "status": "pass",
+      "error": null,
+      "duration_s": 6.49,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 6.49,
+          "lane_id": "ep_e30f441c4c25ee011d3dd3b7",
+          "owner_id": "worker-b",
+          "lease_epoch": 3,
+          "reason": "acquire"
+        },
+        {
+          "at": 6.49,
+          "lane_id": "ep_e220afb0b7a5346e29061cad",
+          "owner_id": "worker-b",
+          "lease_epoch": 3,
+          "reason": "acquire"
+        },
+        {
+          "at": 6.49,
+          "lane_id": "ep_3051ba74b2565f7114bda13b",
+          "owner_id": "worker-b",
+          "lease_epoch": 3,
+          "reason": "drain_handoff"
+        },
+        {
+          "at": 6.49,
+          "lane_id": "ep_a099f908d4ec26ecd889dca7",
+          "owner_id": "worker-b",
+          "lease_epoch": 2,
+          "reason": "drain_handoff"
+        }
+      ],
+      "max_interruption_s": 0.0,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-b",
+      "receipt_count": 12,
+      "metrics": {
+        "worker-a": {
+          "drain_handoff": 2,
+          "renew": 18
+        },
+        "worker-b": {
+          "acquire": 3,
+          "drain_handoff": 2,
+          "orphan_recovered": 2,
+          "renew": 38
+        }
+      },
+      "note": {
+        "owned_series": [
+          4,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          1,
+          0
+        ],
+        "handoff_reasons": [
+          "drain_handoff",
+          "drain_release"
+        ],
+        "final_owner": "worker-b",
+        "total_receipts": 12
+      }
+    },
+    {
+      "scenario": "7",
+      "title": "加入/移除/重启 + 多次 rebalance：cap、无 orphan、无全停窗口",
+      "status": "pass",
+      "error": null,
+      "duration_s": 14.72,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 14.72,
+          "lane_id": "ep_6b31f2b80291ff44fbd390eb",
+          "owner_id": "worker-b",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "at": 14.72,
+          "lane_id": "ep_e6e18d06954fc6e1e11f685f",
+          "owner_id": "worker-b",
+          "lease_epoch": 1,
+          "reason": "acquire"
+        },
+        {
+          "at": 14.72,
+          "lane_id": "ep_3222b18af9a72ccb28cf73d0",
+          "owner_id": "worker-a",
+          "lease_epoch": 4,
+          "reason": "rebalance_handoff"
+        },
+        {
+          "at": 14.72,
+          "lane_id": "ep_3b052890b11cfedd0d08aae7",
+          "owner_id": "worker-a",
+          "lease_epoch": 3,
+          "reason": "acquire"
+        },
+        {
+          "at": 14.72,
+          "lane_id": "ep_f37d0b4dfdf906edb4f21c50",
+          "owner_id": "worker-a",
+          "lease_epoch": 3,
+          "reason": "acquire"
+        },
+        {
+          "at": 14.72,
+          "lane_id": "ep_e00b03efd3ac51b8c7976457",
+          "owner_id": "worker-b",
+          "lease_epoch": 3,
+          "reason": "acquire"
+        }
+      ],
+      "max_interruption_s": 7.59,
+      "stale_write_rejected_total": 0,
+      "final_owner": "worker-a,worker-b",
+      "receipt_count": 36,
+      "metrics": {
+        "worker-a": {
+          "acquire": 5,
+          "orphan_recovered": 0,
+          "rebalance_handoff": 1,
+          "renew": 41
+        },
+        "worker-b": {
+          "acquire": 4,
+          "orphan_recovered": 0,
+          "rebalance_handoff": 1,
+          "renew": 49,
+          "steal": 1
+        }
+      },
+      "note": {
+        "loads": [
+          {
+            "worker-a": 3,
+            "worker-b": 2,
+            "worker-c": 1
+          }
+        ],
+        "rebalance_moves_per_round": [
+          0,
+          0,
+          0
+        ],
+        "loads_final": {
+          "worker-a": 3,
+          "worker-b": 3
+        },
+        "total_receipts": 36,
+        "background_receipts": 36,
+        "final_owner": "worker-a,worker-b"
+      }
+    },
+    {
+      "scenario": "8",
+      "title": "store outage：停 outbound，恢复后重竞争，旧 epoch 不复活",
+      "status": "pass",
+      "error": null,
+      "duration_s": 11.23,
+      "ttl_s": 4.0,
+      "epochs": [
+        {
+          "at": 11.22,
+          "lane_id": "ep_d8c102cd9d34cb57ead79568",
+          "owner_id": "worker-b",
+          "lease_epoch": 2,
+          "reason": "expiry_steal"
+        }
+      ],
+      "max_interruption_s": 10.32,
+      "stale_write_rejected_total": 16,
+      "final_owner": "worker-b",
+      "receipt_count": 5,
+      "metrics": {
+        "worker-a": {
+          "renew": 2,
+          "stale_write_rejected": 16
+        },
+        "worker-b": {
+          "orphan_recovered": 0,
+          "renew": 3,
+          "steal": 1
+        }
+      },
+      "note": {
+        "final_owner": "worker-b",
+        "final_epoch": 2,
+        "total_receipts": 5,
+        "outage_window_s": 6.5,
+        "side_effects_during_outage": 0,
+        "stale_write_rejected": 16
+      }
+    }
+  ]
+}
